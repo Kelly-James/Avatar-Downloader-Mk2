@@ -1,6 +1,7 @@
 const github_user = 'Kelly-James';
 const github_token = 'a9bab058f320076c2dd8a5d7340b32d28b825985';
 const fs = require('fs');
+
 // '.defaults' is a convienience method of 'require' to add options to the request header
 const request = require('request').defaults({
   headers: {
@@ -22,7 +23,8 @@ function getRepoContributors(repoOwner, repoName, callback) {
 
   request.get(requestURL, (err, response, body) => {
     if(err) {
-      return callback(err);
+      console.error('Errors: ', err);
+      return;
     }
     callback(null, response.body);
   })
@@ -31,34 +33,53 @@ function getRepoContributors(repoOwner, repoName, callback) {
 
 // function which loops through the response body and prints the avatar urls to the console
 function printAvatarURLs(repoList) {
-  repoList.forEach((repoObject) => {
-    console.log(repoObject.avatar_url);
-  });
+  // const avatarMapper = repoObject => repoObject.avatar_url;
+  const avatarMapper = repoObject => ({
+    url: repoObject.url,
+    name: repoObject.login
+  })
+  // function avatarMapper(repoObject) { // we are mapping WITH this function
+  //   return {
+  //     url: repoObject.avatar_url,
+  //     name: repoObject.login
+  //   };
+  // }
+  return repoList.map(avatarMapper);
 }
 
+// function which makes a request to Github API and downloads data from given url to disk
+
+var counter = 0;
+
 function downloadImageByURL(url, filePath) {
+  counter += 1;
   request.get(url)
         .on('error', function(err) {
-          throw err;
+          return;
         })
         .on('response', function(response) {
-          console.log('Response Status Message: ', response.statusMessage);
-          console.log('Response Content-Type: ', response.headers['content-type']);
-          console.log('Downloading image ... ');
+          console.log(`Downloading image "${filePath}"`);
         })
         .pipe(fs.createWriteStream(filePath))
         .on('finish', () => {
-          console.log('Download Complete.');
+          counter--;
+          if(counter === 0)
+          {
+            console.log('All downloads completed');
+          }
         })
 };
 
 getRepoContributors('jquery', 'jquery', (err, result) => {
-  if(err)
-  {
+  if(err) {
     console.error('Errors: ', err);
     return;
   }
-  printAvatarURLs(result);
+  var arrayOfAvatarUrls = printAvatarURLs(result);
+  // downloadImageByURL(arrayOfAvatarUrls[0], '/avatars/avatar.jpg');
+  arrayOfAvatarUrls.forEach(function(avatar, index) {
+    const url = avatar.url;
+    const filePath = `./avatars/${avatar.name}.jpg`;
+    downloadImageByURL(avatar, filePath);
+  });
 });
-
-downloadImageByURL('https://avatars.githubusercontent.com/u/1615?v=3', 'avatars/avatar.jpg');
