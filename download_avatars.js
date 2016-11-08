@@ -65,7 +65,7 @@ function downloadImageByURL(url, filePath) {
         })
 };
 
-//
+// Function to be called which makes request to Github, retrieves repo info and calls functions to download avatars
 getRepoContributors(owner, repo, (err, result) => {
   if(err) {
     console.error('Errors: ', err);
