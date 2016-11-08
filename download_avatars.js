@@ -33,22 +33,15 @@ function getRepoContributors(repoOwner, repoName, callback) {
 
 // function which loops through the response body and prints the avatar urls to the console
 function printAvatarURLs(repoList) {
-  // const avatarMapper = repoObject => repoObject.avatar_url;
   const avatarMapper = repoObject => ({
     url: repoObject.url,
     name: repoObject.login
   })
-  // function avatarMapper(repoObject) { // we are mapping WITH this function
-  //   return {
-  //     url: repoObject.avatar_url,
-  //     name: repoObject.login
-  //   };
-  // }
   return repoList.map(avatarMapper);
 }
 
 // function which makes a request to Github API and downloads data from given url to disk
-
+// counter variable added which counts up for each response and down for each end event. Once final end event fires, logs 'All downloads completed'
 var counter = 0;
 
 function downloadImageByURL(url, filePath) {
@@ -62,7 +55,7 @@ function downloadImageByURL(url, filePath) {
         })
         .pipe(fs.createWriteStream(filePath))
         .on('finish', () => {
-          counter--;
+          counter -= 1;
           if(counter === 0)
           {
             console.log('All downloads completed');
@@ -70,13 +63,13 @@ function downloadImageByURL(url, filePath) {
         })
 };
 
+//  
 getRepoContributors('jquery', 'jquery', (err, result) => {
   if(err) {
     console.error('Errors: ', err);
     return;
   }
   var arrayOfAvatarUrls = printAvatarURLs(result);
-  // downloadImageByURL(arrayOfAvatarUrls[0], '/avatars/avatar.jpg');
   arrayOfAvatarUrls.forEach(function(avatar, index) {
     const url = avatar.url;
     const filePath = `./avatars/${avatar.name}.jpg`;
