@@ -1,6 +1,8 @@
 const github_user = 'Kelly-James';
 const github_token = 'a9bab058f320076c2dd8a5d7340b32d28b825985';
 const fs = require('fs');
+const owner = process.argv[2];
+const repo = process.argv[3];
 
 // '.defaults' is a convienience method of 'require' to add options to the request header
 const request = require('request').defaults({
@@ -63,8 +65,8 @@ function downloadImageByURL(url, filePath) {
         })
 };
 
-//  
-getRepoContributors('jquery', 'jquery', (err, result) => {
+//
+getRepoContributors(owner, repo, (err, result) => {
   if(err) {
     console.error('Errors: ', err);
     return;
