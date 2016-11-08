@@ -34,7 +34,7 @@ function getRepoContributors(repoOwner, repoName, callback) {
 }
 
 // function which loops through the response body and prints the avatar urls to the console
-function printAvatarURLs(repoList) {
+function mapAvatarURLs(repoList) {
   const avatarMapper = repoObject => ({
     url: repoObject.url,
     name: repoObject.login
@@ -71,7 +71,11 @@ getRepoContributors(owner, repo, (err, result) => {
     console.error('Errors: ', err);
     return;
   }
-  var arrayOfAvatarUrls = printAvatarURLs(result);
+  if(!owner || !repo) {
+    console.log('Please provide valid Repo Owner and/or Repo Name!');
+    return;
+  }
+  var arrayOfAvatarUrls = mapAvatarURLs(result);
   arrayOfAvatarUrls.forEach(function(avatar, index) {
     const url = avatar.url;
     const filePath = `./avatars/${avatar.name}.jpg`;
